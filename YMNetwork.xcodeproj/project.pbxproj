@@ -7,11 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		880D48AF2443318600B136EF /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880D48AE2443318600B136EF /* Service.swift */; };
+		880D48B12443328A00B136EF /* Encoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880D48B02443328A00B136EF /* Encoding.swift */; };
 		88E5DD302443271200A669D2 /* YMNetwork.h in Headers */ = {isa = PBXBuildFile; fileRef = 88E5DD2E2443271200A669D2 /* YMNetwork.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		88E5DD372443273B00A669D2 /* YMNetwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88E5DD362443273B00A669D2 /* YMNetwork.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		880D48AE2443318600B136EF /* Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
+		880D48B02443328A00B136EF /* Encoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Encoding.swift; sourceTree = "<group>"; };
 		88E5DD2B2443271200A669D2 /* YMNetwork.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = YMNetwork.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		88E5DD2E2443271200A669D2 /* YMNetwork.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YMNetwork.h; sourceTree = "<group>"; };
 		88E5DD2F2443271200A669D2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -29,6 +33,29 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		880D48A9244330CE00B136EF /* Encoding */ = {
+			isa = PBXGroup;
+			children = (
+				880D48B02443328A00B136EF /* Encoding.swift */,
+			);
+			path = Encoding;
+			sourceTree = "<group>";
+		};
+		880D48AA244330DA00B136EF /* Service */ = {
+			isa = PBXGroup;
+			children = (
+				880D48AE2443318600B136EF /* Service.swift */,
+			);
+			path = Service;
+			sourceTree = "<group>";
+		};
+		880D48AB244330DE00B136EF /* Manager */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Manager;
+			sourceTree = "<group>";
+		};
 		88E5DD212443271200A669D2 = {
 			isa = PBXGroup;
 			children = (
@@ -48,6 +75,9 @@
 		88E5DD2D2443271200A669D2 /* YMNetwork */ = {
 			isa = PBXGroup;
 			children = (
+				880D48AB244330DE00B136EF /* Manager */,
+				880D48AA244330DA00B136EF /* Service */,
+				880D48A9244330CE00B136EF /* Encoding */,
 				88E5DD362443273B00A669D2 /* YMNetwork.swift */,
 				88E5DD2E2443271200A669D2 /* YMNetwork.h */,
 				88E5DD2F2443271200A669D2 /* Info.plist */,
@@ -136,6 +166,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				88E5DD372443273B00A669D2 /* YMNetwork.swift in Sources */,
+				880D48B12443328A00B136EF /* Encoding.swift in Sources */,
+				880D48AF2443318600B136EF /* Service.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
