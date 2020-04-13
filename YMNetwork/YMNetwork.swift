@@ -16,7 +16,7 @@ public typealias YMNetworkCompletion = (
 
 // MARK: - YMNetwork
 
-protocol YMNetwork: class {
+protocol NetworkCommunication: class {
 
     associatedtype EndPoint: EndPointType
 
@@ -26,7 +26,7 @@ protocol YMNetwork: class {
 
 // MARK: - YMNetworkRouter
 
-class YMNetworkRouter<EndPoint: EndPointType>: YMNetwork {
+class YMNetworkRouter<EndPoint: EndPointType>: NetworkCommunication {
 
     private var task: URLSessionTask?
 
@@ -98,7 +98,6 @@ class YMNetworkRouter<EndPoint: EndPointType>: YMNetwork {
     ) throws {
 
         do {
-
             if let bodyParameters = bodyParameters {
                 try JSONParameterEncoder.encode(urlRequest: &request, with: bodyParameters)
             }
