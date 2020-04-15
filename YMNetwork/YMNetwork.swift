@@ -16,7 +16,7 @@ public typealias YMNetworkCompletion = (
 
 // MARK: - YMNetwork
 
-protocol NetworkCommunication: class {
+public protocol NetworkCommunication: class {
 
     associatedtype EndPoint: EndPointType
 
@@ -24,13 +24,15 @@ protocol NetworkCommunication: class {
     func cancel()
 }
 
-// MARK: - YMNetworkRouter
+// MARK: - YMNetworkManager
 
-class YMNetworkRouter<EndPoint: EndPointType>: NetworkCommunication {
+public class YMNetworkManager<EndPoint: EndPointType>: NetworkCommunication {
 
     private var task: URLSessionTask?
 
-    func request(_ endPoint: EndPoint, completion: @escaping YMNetworkCompletion) {
+    public init() {}
+
+    public func request(_ endPoint: EndPoint, completion: @escaping YMNetworkCompletion) {
 
         let session = URLSession.shared
 
@@ -47,7 +49,7 @@ class YMNetworkRouter<EndPoint: EndPointType>: NetworkCommunication {
         self.task?.resume()
     }
 
-    func cancel() {
+    public func cancel() {
 
         task?.cancel()
     }
@@ -55,7 +57,7 @@ class YMNetworkRouter<EndPoint: EndPointType>: NetworkCommunication {
     fileprivate func buildRequest(from endPoint: EndPoint) throws -> URLRequest {
 
         var request = URLRequest(
-            url: endPoint.baserURL.appendingPathComponent(endPoint.path),
+            url: endPoint.baseURL.appendingPathComponent(endPoint.path),
             cachePolicy: .reloadIgnoringLocalAndRemoteCacheData,
             timeoutInterval: 10.0
         )
