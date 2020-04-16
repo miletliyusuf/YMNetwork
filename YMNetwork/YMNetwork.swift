@@ -14,31 +14,51 @@ public typealias YMNetworkCompletion = (
     _ error: Error?
     ) -> ()
 
-// MARK: - YMNetwork
+// MARK: - NetworkCommunication
 
 public protocol NetworkCommunication: class {
 
-    associatedtype EndPoint: EndPointType
-
-    func request(_ endPoint: EndPoint, completion: @escaping YMNetworkCompletion)
+    func request(_ request: YMRequest, completion: @escaping YMNetworkCompletion)
     func cancel()
+}
+
+// MARK: - YMNetworkConfiguartion
+
+public struct YMNetworkConfiguartion {
+
+    // TODO: - Add all possible configurations
+
+    var baseURL: String
+    var headers: HTTPHeaders
+
+    public init(
+        baseURL: String,
+        headers: HTTPHeaders
+    ) {
+        self.baseURL = baseURL
+        self.headers = headers
+    }
 }
 
 // MARK: - YMNetworkManager
 
-public class YMNetworkManager<EndPoint: EndPointType>: NetworkCommunication {
+public class YMNetworkManager: NetworkCommunication {
 
     private var task: URLSessionTask?
+    private var configuration: YMNetworkConfiguartion
 
-    public init() {}
+    public init(configuration: YMNetworkConfiguartion) {
 
-    public func request(_ endPoint: EndPoint, completion: @escaping YMNetworkCompletion) {
+        self.configuration = configuration
+    }
+
+    public func request(_ request: YMRequest, completion: @escaping YMNetworkCompletion) {
 
         let session = URLSession.shared
 
         // TODO: Improve
         do {
-            let request = try self.buildRequest(from: endPoint)
+            guard let request = try self.buildRequest(from: request) else { return }
             task = session.dataTask(with: request, completionHandler: { (data, response, error) in
                 completion(data, response, error)
             })
@@ -54,40 +74,49 @@ public class YMNetworkManager<EndPoint: EndPointType>: NetworkCommunication {
         task?.cancel()
     }
 
-    fileprivate func buildRequest(from endPoint: EndPoint) throws -> URLRequest {
+    public func handleNetworkResponse<T: CodableResponse>(_ response: Response) -> Result<T> {
 
-        var request = URLRequest(
-            url: endPoint.baseURL.appendingPathComponent(endPoint.path),
+        switch response.response?.statusCode ?? -1 {
+        case 200...299:
+            do {
+                guard let data = response.data else { return .failure(NetworkResponse.failed) }
+                let apiResponse = try JSONDecoder().decode(T.self, from: data)
+                return Result.success(apiResponse)
+            } catch {
+                return .failure(NetworkResponse.failed)
+            }
+
+        case 401...500:
+            return .failure(NetworkResponse.authenticationError)
+        case 501...599:
+            return .failure(NetworkResponse.badRequest)
+        case 600:
+            return .failure(NetworkResponse.outdated)
+        default:
+            return .failure(NetworkResponse.failed)
+        }
+    }
+
+    fileprivate func buildRequest(from request: YMRequest) throws -> URLRequest? {
+
+        guard let baseURL = URL(string: configuration.baseURL) else { return nil }
+        var urlRequest = URLRequest(
+            url: baseURL.appendingPathComponent(request.path),
             cachePolicy: .reloadIgnoringLocalAndRemoteCacheData,
-            timeoutInterval: 10.0
+            timeoutInterval: 10.0 // TODO: - Fix it
         )
 
-        request.httpMethod = endPoint.httpMethod.rawValue
+        urlRequest.httpMethod = request.method.rawValue
 
         do {
-            switch endPoint.task {
-            case .request:
-                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            case .requestParameters(let bodyParameters, let urlParameters):
-                try self.configureParameters(
-                    bodyParameters: bodyParameters,
-                    urlParameters: urlParameters,
-                    request: &request
-                )
-            case .requestParametersAndHeaders(
-                let bodyParameters,
-                let urlParameters,
-                let additionalHeaders):
+            addAdditionalHeaders(configuration.headers, request: &urlRequest)
 
-                self.addAdditionalHeaders(additionalHeaders, request: &request)
-
-                try self.configureParameters(
-                    bodyParameters: bodyParameters,
-                    urlParameters: urlParameters,
-                    request: &request
-                )
-            }
-            return request
+            try configureParameters(
+                bodyParameters: request.bodyParameters,
+                urlParameters: request.urlParameters,
+                request: &urlRequest
+            )
+            return urlRequest
         } catch {
             throw error
         }

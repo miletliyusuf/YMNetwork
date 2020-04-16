@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		880D48AF2443318600B136EF /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880D48AE2443318600B136EF /* Service.swift */; };
 		880D48B12443328A00B136EF /* Encoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880D48B02443328A00B136EF /* Encoding.swift */; };
+		8860917624490EBE00267B42 /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8860917524490EBE00267B42 /* Request.swift */; };
 		88E5DD302443271200A669D2 /* YMNetwork.h in Headers */ = {isa = PBXBuildFile; fileRef = 88E5DD2E2443271200A669D2 /* YMNetwork.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		88E5DD372443273B00A669D2 /* YMNetwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88E5DD362443273B00A669D2 /* YMNetwork.swift */; };
 		88EF5120244796310006C4A0 /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88EF511F244796310006C4A0 /* Response.swift */; };
@@ -17,6 +18,7 @@
 /* Begin PBXFileReference section */
 		880D48AE2443318600B136EF /* Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
 		880D48B02443328A00B136EF /* Encoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Encoding.swift; sourceTree = "<group>"; };
+		8860917524490EBE00267B42 /* Request.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Request.swift; sourceTree = "<group>"; };
 		88E5DD2B2443271200A669D2 /* YMNetwork.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = YMNetwork.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		88E5DD2E2443271200A669D2 /* YMNetwork.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YMNetwork.h; sourceTree = "<group>"; };
 		88E5DD2F2443271200A669D2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -91,6 +93,7 @@
 		88EF511E244796200006C4A0 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				8860917524490EBE00267B42 /* Request.swift */,
 				88EF511F244796310006C4A0 /* Response.swift */,
 			);
 			path = Models;
@@ -178,6 +181,7 @@
 			files = (
 				88EF5120244796310006C4A0 /* Response.swift in Sources */,
 				88E5DD372443273B00A669D2 /* YMNetwork.swift in Sources */,
+				8860917624490EBE00267B42 /* Request.swift in Sources */,
 				880D48B12443328A00B136EF /* Encoding.swift in Sources */,
 				880D48AF2443318600B136EF /* Service.swift in Sources */,
 			);
