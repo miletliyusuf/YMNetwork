@@ -21,17 +21,6 @@ public enum HTTPMethod: String {
     case delete = "DELETE"
 }
 
-// MARK: - EndPointType
-
-public protocol EndPointType {
-
-    var baseURL: URL { get }
-    var path: String { get }
-    var httpMethod: HTTPMethod { get }
-    var task: HTTPTask { get }
-    var headers: HTTPHeaders? { get }
-}
-
 // MARK: - HTTPTask
 
 public enum HTTPTask {

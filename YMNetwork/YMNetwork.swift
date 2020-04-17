@@ -8,9 +8,9 @@
 
 import Foundation
 
-public typealias YMNetworkCompletion = (
-    _ data: Data?,
-    _ response: URLResponse?,
+public typealias YMNetworkCompletion<T> = (
+    _ response: HTTPURLResponse?,
+    _ result: Result<T>,
     _ error: Error?
     ) -> ()
 
@@ -18,7 +18,10 @@ public typealias YMNetworkCompletion = (
 
 public protocol NetworkCommunication: class {
 
-    func request(_ request: YMRequest, completion: @escaping YMNetworkCompletion)
+    func request<T: CodableResponse>(
+        _ request: YMRequest,
+        completion: @escaping YMNetworkCompletion<T>
+    )
     func cancel()
 }
 
@@ -30,13 +33,16 @@ public struct YMNetworkConfiguartion {
 
     var baseURL: String
     var headers: HTTPHeaders
+    var timeoutInterval: TimeInterval
 
     public init(
         baseURL: String,
-        headers: HTTPHeaders
+        headers: HTTPHeaders,
+        timeoutInterval: TimeInterval = 10.0
     ) {
         self.baseURL = baseURL
         self.headers = headers
+        self.timeoutInterval = timeoutInterval
     }
 }
 
@@ -52,7 +58,10 @@ public class YMNetworkManager: NetworkCommunication {
         self.configuration = configuration
     }
 
-    public func request(_ request: YMRequest, completion: @escaping YMNetworkCompletion) {
+    public func request<T: CodableResponse>(
+        _ request: YMRequest,
+        completion: @escaping YMNetworkCompletion<T>
+    ) {
 
         let session = URLSession.shared
 
@@ -60,10 +69,18 @@ public class YMNetworkManager: NetworkCommunication {
         do {
             guard let request = try self.buildRequest(from: request) else { return }
             task = session.dataTask(with: request, completionHandler: { (data, response, error) in
-                completion(data, response, error)
+
+                guard let urlResponse = response as? HTTPURLResponse else { return }
+                let result: Result<T> = self.handleNetworkResponse(
+                    Response(
+                        response: urlResponse,
+                        data: data
+                    )
+                )
+                completion(urlResponse, result, error)
             })
         } catch {
-            completion(nil, nil, error)
+            completion(nil, .failure(NetworkResponse.failed), error)
         }
 
         self.task?.resume()
@@ -74,26 +91,29 @@ public class YMNetworkManager: NetworkCommunication {
         task?.cancel()
     }
 
-    public func handleNetworkResponse<T: CodableResponse>(_ response: Response) -> Result<T> {
+    fileprivate func handleNetworkResponse<T: CodableResponse>(_ response: Response) -> Result<T> {
 
-        switch response.response?.statusCode ?? -1 {
+        guard let statusCode = response.response?.statusCode else {
+            return .failure(.unknown)
+        }
+        switch statusCode {
         case 200...299:
             do {
-                guard let data = response.data else { return .failure(NetworkResponse.failed) }
+                guard let data = response.data else { return .failure(.noData) }
                 let apiResponse = try JSONDecoder().decode(T.self, from: data)
                 return Result.success(apiResponse)
             } catch {
-                return .failure(NetworkResponse.failed)
+                return .failure(.decodingFailed)
             }
 
         case 401...500:
-            return .failure(NetworkResponse.authenticationError)
+            return .failure(.authenticationError)
         case 501...599:
-            return .failure(NetworkResponse.badRequest)
+            return .failure(.badRequest)
         case 600:
-            return .failure(NetworkResponse.outdated)
+            return .failure(.outdated)
         default:
-            return .failure(NetworkResponse.failed)
+            return .failure(.failed)
         }
     }
 
@@ -103,7 +123,7 @@ public class YMNetworkManager: NetworkCommunication {
         var urlRequest = URLRequest(
             url: baseURL.appendingPathComponent(request.path),
             cachePolicy: .reloadIgnoringLocalAndRemoteCacheData,
-            timeoutInterval: 10.0 // TODO: - Fix it
+            timeoutInterval: configuration.timeoutInterval
         )
 
         urlRequest.httpMethod = request.method.rawValue

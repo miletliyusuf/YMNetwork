@@ -17,6 +17,8 @@ public enum NetworkResponse: String {
     case failed = "Network requst failed."
     case noData = "Response returned with no data to decode."
     case unableToDecode = "We could not decode the response."
+    case unknown = "Unknown status code."
+    case decodingFailed = "Failed to decode data."
 }
 
 public enum Result<Value> {
