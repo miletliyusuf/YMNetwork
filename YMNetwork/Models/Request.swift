@@ -15,6 +15,7 @@ public protocol YMRequest {
     var headers: HTTPHeaders? { get }
     var bodyParameters: Parameters? { get }
     var urlParameters: Parameters? { get }
+    var task: HTTPTaskType { get }
 }
 
 public extension YMRequest {
@@ -23,4 +24,5 @@ public extension YMRequest {
     var headers: HTTPHeaders? { return nil }
     var bodyParameters: Parameters? { return nil }
     var urlParameters: Parameters? { return nil }
+    var task: HTTPTaskType { return .data }
 }

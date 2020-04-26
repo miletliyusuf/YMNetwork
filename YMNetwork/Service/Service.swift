@@ -23,19 +23,11 @@ public enum HTTPMethod: String {
 
 // MARK: - HTTPTask
 
-public enum HTTPTask {
+public enum HTTPTaskType {
 
-    case request
-    case requestParameters(bodyParameters: Parameters?, urlParameters: Parameters?)
-    case requestParametersAndHeaders(
-        bodyParameters: Parameters?,
-        urlParameters: Parameters?,
-        additionHeaders: HTTPHeaders?
-    )
-
-    // TODO:
-    // case download
-    // case upload
+    case data
+    case download
+    case upload
 }
 
 // MARK: - NetworkError

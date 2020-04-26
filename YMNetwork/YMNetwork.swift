@@ -22,75 +22,148 @@ public protocol NetworkCommunication: class {
         _ request: YMRequest,
         completion: @escaping YMNetworkCompletion<T>
     )
-    func cancel()
+    func cancelDataTask()
 }
 
-// MARK: - YMNetworkConfiguartion
+// MARK: - YMNetworkManagerDownloadDelegate
 
-public struct YMNetworkConfiguartion {
+public protocol YMNetworkManagerDownloadDelegate: AnyObject {
 
-    // TODO: - Add all possible configurations
+    func ymNetworkManager(
+        _ manager: YMNetworkManager,
+        request: YMDownloadRequest?,
+        downloadTask: URLSessionDownloadTask,
+        didFinishDownloadingTo location: URL
+    )
 
-    var baseURL: String
-    var headers: HTTPHeaders
-    var timeoutInterval: TimeInterval
+    func ymNetworkManager(
+        _ manager: YMNetworkManager,
+        request: YMDownloadRequest?,
+        downloadTask: URLSessionDownloadTask
+    )
 
-    public init(
-        baseURL: String,
-        headers: HTTPHeaders,
-        timeoutInterval: TimeInterval = 10.0
-    ) {
-        self.baseURL = baseURL
-        self.headers = headers
-        self.timeoutInterval = timeoutInterval
-    }
+    func ymNetworkManager(
+        _ manager: YMNetworkManager,
+        request: YMDownloadRequest?,
+        didDownloadBecomeInvalidWithError error: Error?
+    )
+}
+
+extension YMNetworkManagerDownloadDelegate {
+
+    public func ymNetworkManager(
+        _ manager: YMNetworkManager,
+        request: YMDownloadRequest?,
+        downloadTask: URLSessionDownloadTask,
+        didFinishDownloadingTo location: URL
+    ) {}
+
+    public func ymNetworkManager(
+        _ manager: YMNetworkManager,
+        request: YMDownloadRequest?,
+        downloadTask: URLSessionDownloadTask
+    ) {}
+
+    public func ymNetworkManager(
+        _ manager: YMNetworkManager,
+        request: YMDownloadRequest?,
+        didDownloadBecomeInvalidWithError error: Error?
+    ) {}
 }
 
 // MARK: - YMNetworkManager
 
-public class YMNetworkManager: NetworkCommunication {
+public class YMNetworkManager: NSObject, NetworkCommunication {
 
-    private var task: URLSessionTask?
+    private var dataTask: URLSessionTask?
+    lazy var downloadsSession: URLSession = {
+
+        let configuration = URLSessionConfiguration.default
+
+        return URLSession(
+            configuration: configuration,
+            delegate: self,
+            delegateQueue: nil
+        )
+    }()
+    private var downloadTask: URLSessionDownloadTask?
+    private var uploadTask: URLSessionUploadTask?
     private var configuration: YMNetworkConfiguartion
+    public weak var delegate: YMNetworkManagerDownloadDelegate?
+
+    public var activeDownloads: [URL?: YMDownloadRequest] = [:]
 
     public init(configuration: YMNetworkConfiguartion) {
 
         self.configuration = configuration
     }
 
+
+    /// <#Description#>
+    /// - Parameters:
+    ///   - request: <#request description#>
+    ///   - completion: <#completion description#>
     public func request<T: CodableResponse>(
         _ request: YMRequest,
         completion: @escaping YMNetworkCompletion<T>
     ) {
 
-        let session = URLSession.shared
-
         // TODO: Improve
         do {
-            guard let request = try self.buildRequest(from: request) else { return }
-            task = session.dataTask(with: request, completionHandler: { (data, response, error) in
+            guard let urlRequest = try buildRequest(from: request) else { return }
 
-                guard let urlResponse = response as? HTTPURLResponse else { return }
-                let result: Result<T> = self.handleNetworkResponse(
-                    Response(
-                        response: urlResponse,
-                        data: data
-                    )
+            switch request.task {
+            case .data:
+                let session = URLSession(configuration: .default)
+                dataTask = session.dataTask(
+                    with: urlRequest,
+                    completionHandler: { [weak self] (data, response, error) in
+
+                        defer {
+                            self?.dataTask = nil
+                        }
+
+                        guard let urlResponse = response as? HTTPURLResponse else { return }
+                        let result: Result<T> = self?.handleNetworkResponse(
+                            Response(response: urlResponse, data: data)
+                            ) ?? .failure(.failed)
+                        completion(urlResponse, result, error)
+                    }
                 )
-                completion(urlResponse, result, error)
-            })
+                dataTask?.resume()
+            case .download:
+
+                guard let url = urlRequest.url,
+                    var downloadRequest = request as? YMDownloadRequest else { return }
+                if let activeDownload = activeDownloads[url] {
+                    if !activeDownload.isDownloading {
+                        resumeDownloadTask(of: downloadRequest)
+                    }
+                } else {
+                    downloadTask = downloadsSession.downloadTask(with: urlRequest)
+                    downloadTask?.resume()
+                    downloadRequest.isDownloading = true
+                    downloadRequest.downloadTask = downloadTask
+                    delegate = downloadRequest.delegate
+                    activeDownloads[url] = downloadRequest
+                }
+            case .upload:
+                break
+            }
         } catch {
-            completion(nil, .failure(NetworkResponse.failed), error)
+            completion(nil, .failure(.failed), error)
         }
-
-        self.task?.resume()
     }
 
-    public func cancel() {
 
-        task?.cancel()
+    /// <#Description#>
+    public func cancelDataTask() {
+
+        dataTask?.cancel()
     }
 
+    /// <#Description#>
+    /// - Parameter response: <#response description#>
     fileprivate func handleNetworkResponse<T: CodableResponse>(_ response: Response) -> Result<T> {
 
         guard let statusCode = response.response?.statusCode else {
@@ -117,6 +190,9 @@ public class YMNetworkManager: NetworkCommunication {
         }
     }
 
+
+    /// <#Description#>
+    /// - Parameter request: <#request description#>
     fileprivate func buildRequest(from request: YMRequest) throws -> URLRequest? {
 
         guard let baseURL = URL(string: configuration.baseURL) else { return nil }
@@ -142,6 +218,12 @@ public class YMNetworkManager: NetworkCommunication {
         }
     }
 
+
+    /// <#Description#>
+    /// - Parameters:
+    ///   - bodyParameters: <#bodyParameters description#>
+    ///   - urlParameters: <#urlParameters description#>
+    ///   - request: <#request description#>
     fileprivate func configureParameters(
         bodyParameters: Parameters?,
         urlParameters: Parameters?,
@@ -150,15 +232,20 @@ public class YMNetworkManager: NetworkCommunication {
 
         do {
             if let bodyParameters = bodyParameters {
-                try JSONParameterEncoder.encode(urlRequest: &request, with: bodyParameters)
+                try? JSONParameterEncoder.encode(urlRequest: &request, with: bodyParameters)
             }
 
             if let urlParameters = urlParameters {
-                try URLParameterEncoder.encode(urlRequest: &request, with: urlParameters)
+                try? URLParameterEncoder.encode(urlRequest: &request, with: urlParameters)
             }
         }
     }
 
+
+    /// <#Description#>
+    /// - Parameters:
+    ///   - additionalHeaders: <#additionalHeaders description#>
+    ///   - request: <#request description#>
     fileprivate func addAdditionalHeaders(
         _ additionalHeaders: HTTPHeaders?,
         request: inout URLRequest
@@ -168,5 +255,134 @@ public class YMNetworkManager: NetworkCommunication {
         for (key, value) in headers {
             request.setValue(value, forHTTPHeaderField: key)
         }
+    }
+}
+
+// MARK: - Download Helpers
+
+public extension YMNetworkManager {
+
+    func pauseDownloadTask(of request: YMDownloadRequest) {
+
+        do {
+            guard let url = try buildRequest(from: request)?.url,
+                var req = activeDownloads[url],
+                req.isDownloading else { return }
+
+            req.downloadTask?.cancel(byProducingResumeData: { [weak self] (data) in
+                req.isDownloading = false
+                req.resumeData = data
+                self?.activeDownloads[url] = req
+            })
+        } catch {
+            // TODO
+        }
+    }
+
+    func cancelDownloadTask(of request: YMDownloadRequest) {
+
+        do {
+            guard let url = try buildRequest(from: request)?.url,
+                var req = activeDownloads[url] else { return }
+            req.downloadTask?.cancel()
+            req.isDownloading = false
+            req.resumeData = nil
+            req.progress = .zero
+            activeDownloads[url] = req
+        } catch {
+            // TODO
+        }
+    }
+
+    func resumeDownloadTask(
+        of request: YMDownloadRequest,
+        completion: ((_ status: Bool, _ error: String?) -> ())? = nil
+    ) {
+
+        do {
+            guard let url = try buildRequest(from: request)?.url,
+                var req = activeDownloads[url],
+            !req.isDownloading else { return }
+
+            if let resumeData = req.resumeData {
+                req.downloadTask = downloadsSession.downloadTask(withResumeData: resumeData)
+            } else {
+                do {
+                    guard let urlRequest = try buildRequest(from: req) else { return }
+                    req.downloadTask = downloadsSession.downloadTask(with: urlRequest)
+                } catch (let error) {
+                    completion?(false, error.localizedDescription)
+                }
+            }
+            req.isDownloading = true
+            activeDownloads[url] = req
+            req.downloadTask?.resume()
+            completion?(true, nil)
+        } catch {
+            // TODO
+        }
+    }
+}
+
+// MARK: - URLSessionDownloadDelegate
+
+extension YMNetworkManager: URLSessionDownloadDelegate {
+
+    public func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didFinishDownloadingTo location: URL
+    ) {
+
+        guard let url = downloadTask.currentRequest?.url else { return }
+        var download = activeDownloads[url]
+        download?.isDownloading = false
+        download?.progress = 1.0
+        download?.resumeData = nil
+        activeDownloads[url] = download
+
+        delegate?.ymNetworkManager(
+            self,
+            request: download,
+            downloadTask: downloadTask,
+            didFinishDownloadingTo: location
+        )
+    }
+
+    public func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didWriteData bytesWritten: Int64,
+        totalBytesWritten: Int64,
+        totalBytesExpectedToWrite: Int64
+    ) {
+
+        guard let url = downloadTask.currentRequest?.url else { return }
+        var download = activeDownloads[url]
+        let progress = Float(totalBytesWritten) / Float(totalBytesExpectedToWrite)
+        download?.progress = progress
+        activeDownloads[url] = download
+
+        delegate?.ymNetworkManager(
+            self,
+            request: download,
+            downloadTask: downloadTask
+        )
+    }
+
+    public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: Error?) {
+
+//        var download = activeDownloads[downloadTask]
+//
+//        download?.isDownloading = false
+//        download?.progress = .zero
+//        download?.resumeData = nil
+//        activeDownloads[downloadTask] = download
+//
+//        delegate?.ymNetworkManager(
+//            self,
+//            request: download,
+//            didDownloadBecomeInvalidWithError: error
+//        )
     }
 }
