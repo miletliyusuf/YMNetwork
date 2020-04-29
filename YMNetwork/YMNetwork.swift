@@ -267,7 +267,7 @@ public extension YMNetworkManager {
         do {
             guard let url = try buildRequest(from: request)?.url,
                 var req = activeDownloads[url],
-                req.isDownloading else { return }
+                req.isDownloading ?? false else { return }
 
             req.downloadTask?.cancel(byProducingResumeData: { [weak self] (data) in
                 req.isDownloading = false
@@ -302,7 +302,7 @@ public extension YMNetworkManager {
         do {
             guard let url = try buildRequest(from: request)?.url,
                 var req = activeDownloads[url],
-            !req.isDownloading else { return }
+            !(req.isDownloading ?? true) else { return }
 
             if let resumeData = req.resumeData {
                 req.downloadTask = downloadsSession.downloadTask(withResumeData: resumeData)
@@ -363,6 +363,7 @@ extension YMNetworkManager: URLSessionDownloadDelegate {
         download?.progress = progress
         activeDownloads[url] = download
 
+        print("Manager Log :::: Download Progress -> \(String(format: "%.2f", arguments: [progress]))")
         delegate?.ymNetworkManager(
             self,
             request: download,
