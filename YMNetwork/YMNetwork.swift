@@ -87,6 +87,14 @@ public class YMNetworkManager: NSObject, NetworkCommunication {
         )
     }()
     private var downloadTask: URLSessionDownloadTask?
+    lazy var uploadsSession: URLSession = {
+        let conf = URLSessionConfiguration.default
+        return URLSession(
+            configuration: conf,
+            delegate: self,
+            delegateQueue: nil
+        )
+    }()
     private var uploadTask: URLSessionUploadTask?
     private var configuration: YMNetworkConfiguartion
     public weak var delegate: YMNetworkManagerDownloadDelegate?
@@ -148,7 +156,24 @@ public class YMNetworkManager: NSObject, NetworkCommunication {
                     activeDownloads[url] = downloadRequest
                 }
             case .upload:
-                break
+                guard let uploadRequest = request as? YMUploadRequest,
+                    let fileURL = uploadRequest.fileURL else { return }
+                uploadTask = uploadsSession.uploadTask(
+                    with: urlRequest,
+                    fromFile: fileURL,
+                    completionHandler: { [weak self] (data, response, error) in
+
+                        defer {
+                            self?.uploadTask = nil
+                        }
+
+                        guard let urlResponse = response as? HTTPURLResponse else { return }
+                        let result: Result<T> = self?.handleNetworkResponse(
+                            Response(response: urlResponse, data: data)
+                            ) ?? .failure(.failed)
+                        completion(urlResponse, result, error)
+                })
+                uploadTask?.resume()
             }
         } catch {
             completion(nil, .failure(.failed), error)
@@ -203,15 +228,30 @@ public class YMNetworkManager: NSObject, NetworkCommunication {
         )
 
         urlRequest.httpMethod = request.method.rawValue
+        addAdditionalHeaders(configuration.headers, request: &urlRequest)
 
         do {
-            addAdditionalHeaders(configuration.headers, request: &urlRequest)
-
-            try configureParameters(
-                bodyParameters: request.bodyParameters,
-                urlParameters: request.urlParameters,
-                request: &urlRequest
-            )
+            switch request.task {
+            case .data:
+                try configureParameters(
+                    bodyParameters: request.bodyParameters,
+                    urlParameters: request.urlParameters,
+                    request: &urlRequest
+                )
+//            case .upload:
+//                let boundary = UUID().uuidString
+//                urlRequest.setValue(
+//                    "multipart/form-data; boundary=\(boundary)",
+//                    forHTTPHeaderField: "Content-Type"
+//                )
+//                urlRequest.setValue("fileupload", forHTTPHeaderField: "reqtype")
+//                urlRequest.setValue(
+//                    "@\((request as? YMUploadRequest)?.fileURL?.absoluteString ?? "")",
+//                    forHTTPHeaderField: "fileToUpload"
+//                )
+            default:
+                break
+            }
             return urlRequest
         } catch {
             throw error

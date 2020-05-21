@@ -47,4 +47,8 @@ public extension YMDownloadRequest {
         get { return download?.delegate }
         set { download?.delegate = newValue }
     }
+
+    var task: HTTPTaskType {
+        return .download
+    }
 }
