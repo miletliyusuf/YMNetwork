@@ -206,7 +206,24 @@ manager.request(request) { (response, result: YMResult<T>, error) in
 
 ### CocoaPods TODO
 
-### Carthage TODO
+### Carthage
+
+Check out the [Carthage](https://github.com/Carthage/Carthage) docs on how to add a install. The `YMNetwork` framework is already setup with shared schemes.
+
+[Carthage Install](https://github.com/Carthage/Carthage#adding-frameworks-to-an-application)
+
+You can install Carthage with [Homebrew](http://brew.sh/) using the following command:
+
+```bash
+$ brew update
+$ brew install carthage
+```
+
+To integrate YMNetwork into your Xcode project using Carthage, specify it in your `Cartfile`:
+
+```
+github "miletliyusuf/YMNetwork" >= 1.0.0
+```
 
 ## TODO
 
