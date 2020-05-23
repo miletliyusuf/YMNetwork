@@ -204,7 +204,23 @@ manager.request(request) { (response, result: YMResult<T>, error) in
 
 ## Installation
 
-### CocoaPods TODO
+### CocoaPods
+
+Well.. `YMNetwork` is already taken for cocoapods. You should be installing pod as `pod 'YMNetwork-Swift'` but when you import framework in your code please just use `import YMNetwork`
+
+Check out [Get Started](http://cocoapods.org/) tab on [cocoapods.org](http://cocoapods.org/).
+
+To use Starscream in your project add the following 'Podfile' to your project
+
+	source 'https://github.com/CocoaPods/Specs.git'
+	platform :ios, '8.0'
+	use_frameworks!
+
+	pod 'YMNetwork-Swift'
+
+Then run:
+
+    pod install
 
 ### Carthage
 
