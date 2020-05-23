@@ -8,6 +8,8 @@
 
 import Foundation
 
+// MARK: - YMRequest
+
 public protocol YMRequest {
 
     var path: String { get }

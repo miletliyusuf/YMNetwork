@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		880D48AF2443318600B136EF /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880D48AE2443318600B136EF /* Service.swift */; };
 		880D48B12443328A00B136EF /* Encoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880D48B02443328A00B136EF /* Encoding.swift */; };
+		88165A452479167700747742 /* YMDownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88165A442479167700747742 /* YMDownloadManager.swift */; };
 		885E29ED2461640000090CA2 /* UploadRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 885E29EC2461640000090CA2 /* UploadRequest.swift */; };
 		885EEB212450258E009816B6 /* YMDownloadRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 885EEB202450258E009816B6 /* YMDownloadRequest.swift */; };
 		8860917624490EBE00267B42 /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8860917524490EBE00267B42 /* Request.swift */; };
@@ -21,6 +22,7 @@
 /* Begin PBXFileReference section */
 		880D48AE2443318600B136EF /* Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
 		880D48B02443328A00B136EF /* Encoding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Encoding.swift; sourceTree = "<group>"; };
+		88165A442479167700747742 /* YMDownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YMDownloadManager.swift; sourceTree = "<group>"; };
 		885E29EC2461640000090CA2 /* UploadRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadRequest.swift; sourceTree = "<group>"; };
 		885EEB202450258E009816B6 /* YMDownloadRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YMDownloadRequest.swift; sourceTree = "<group>"; };
 		8860917524490EBE00267B42 /* Request.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Request.swift; sourceTree = "<group>"; };
@@ -60,11 +62,12 @@
 			path = Service;
 			sourceTree = "<group>";
 		};
-		880D48AB244330DE00B136EF /* Manager */ = {
+		88165A432479166E00747742 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				88165A442479167700747742 /* YMDownloadManager.swift */,
 			);
-			path = Manager;
+			path = Managers;
 			sourceTree = "<group>";
 		};
 		88E5DD212443271200A669D2 = {
@@ -86,8 +89,8 @@
 		88E5DD2D2443271200A669D2 /* YMNetwork */ = {
 			isa = PBXGroup;
 			children = (
+				88165A432479166E00747742 /* Managers */,
 				88EF511E244796200006C4A0 /* Models */,
-				880D48AB244330DE00B136EF /* Manager */,
 				880D48AA244330DA00B136EF /* Service */,
 				880D48A9244330CE00B136EF /* Encoding */,
 				88E5DD362443273B00A669D2 /* YMNetwork.swift */,
@@ -191,6 +194,7 @@
 				88609178244B39F100267B42 /* Configuration.swift in Sources */,
 				885EEB212450258E009816B6 /* YMDownloadRequest.swift in Sources */,
 				88EF5120244796310006C4A0 /* Response.swift in Sources */,
+				88165A452479167700747742 /* YMDownloadManager.swift in Sources */,
 				88E5DD372443273B00A669D2 /* YMNetwork.swift in Sources */,
 				885E29ED2461640000090CA2 /* UploadRequest.swift in Sources */,
 				8860917624490EBE00267B42 /* Request.swift in Sources */,

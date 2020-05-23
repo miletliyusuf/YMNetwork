@@ -18,6 +18,11 @@ public struct YMNetworkConfiguartion {
     var headers: HTTPHeaders
     var timeoutInterval: TimeInterval
 
+    /// Public initializer of YMNetworkConfiguration.
+    /// - Parameters:
+    ///   - baseURL: Requested domain url in `String`.
+    ///   - headers: HTTPHeaders
+    ///   - timeoutInterval: Request interval time in seconds. Default is `10.0`.
     public init(
         baseURL: String,
         headers: HTTPHeaders,

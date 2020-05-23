@@ -8,7 +8,22 @@
 
 import Foundation
 
-public enum NetworkResponse: String {
+// MARK: - YMResponse
+
+public protocol YMResponse: Codable {}
+
+public extension YMResponse {
+
+    func encode(to encoder: Encoder) throws {}
+}
+
+// MARK: - YMModel
+
+public protocol YMModel : Decodable, Encodable {}
+
+// MARK: - YMNetworkResponse
+
+public enum YMNetworkResponse: String {
 
     case success
     case authenticationError = "You need to be authenticated first."
@@ -21,11 +36,15 @@ public enum NetworkResponse: String {
     case decodingFailed = "Failed to decode data."
 }
 
-public enum Result<Value> {
+// MARK: - YMResult
+
+public enum YMResult<Value> {
 
     case success(Value)
-    case failure(NetworkResponse)
+    case failure(YMNetworkResponse)
 }
+
+// MARK: - Response
 
 public struct Response {
 
@@ -40,12 +59,4 @@ public struct Response {
         self.response = response
         self.data = data
     }
-}
-
-// Codable response protocol that conforms to Codable
-public protocol CodableResponse: Codable {}
-
-public extension CodableResponse {
-
-    func encode(to encoder: Encoder) throws {}
 }

@@ -8,6 +8,8 @@
 
 import Foundation
 
+// MARK: - YMUploadRequest
+
 public protocol YMUploadRequest: YMRequest {
 
     var fileURL: URL? { get set }
