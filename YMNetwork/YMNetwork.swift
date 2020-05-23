@@ -135,22 +135,6 @@ public class YMNetworkManager: NSObject, YMNetworkCommunication {
                     }
                 )
                 dataTask?.resume()
-            case .download:
-
-                guard let url = urlRequest.url else { return }
-
-                if let activeDownload = YMDownloadManager.shared.activeDownloads[url],
-                    !activeDownload.isDownloading {
-                    resumeDownloadTask(of: activeDownload)
-                } else {
-                    downloadTask = downloadsSession.downloadTask(with: urlRequest)
-                    downloadTask?.resume()
-                    let req = request as? YMDownloadRequest
-                    req?.isDownloading = true
-                    req?.downloadTask = downloadTask
-                    delegate = req?.delegate
-                    YMDownloadManager.shared.activeDownloads[url] = req
-                }
             case .upload:
                 guard let uploadRequest = request as? YMUploadRequest,
                     let fileURL = uploadRequest.fileURL else { return }
@@ -170,6 +154,8 @@ public class YMNetworkManager: NSObject, YMNetworkCommunication {
                         completion(urlResponse, result, error)
                 })
                 uploadTask?.resume()
+            default:
+                break
             }
         } catch {
             completion(nil, .failure(.failed), error)
@@ -299,6 +285,25 @@ public class YMNetworkManager: NSObject, YMNetworkCommunication {
 // MARK: - Download Helpers
 
 public extension YMNetworkManager {
+
+    func download(with request: inout YMDownloadRequest?) throws {
+
+        guard let ymRequest = request,
+            let urlRequest = try? buildRequest(from: ymRequest),
+            let url = urlRequest.url else { return }
+
+        if let activeDownload = YMDownloadManager.shared.activeDownloads[url],
+            !activeDownload.isDownloading {
+            resumeDownloadTask(of: activeDownload)
+        } else {
+            downloadTask = downloadsSession.downloadTask(with: urlRequest)
+            downloadTask?.resume()
+            request?.isDownloading = true
+            request?.downloadTask = downloadTask
+            delegate = request?.delegate
+            YMDownloadManager.shared.activeDownloads[url] = request
+        }
+    }
 
     /// Pause current download request if it is downloading.
     /// - Parameter request: YMDownloadRequest
