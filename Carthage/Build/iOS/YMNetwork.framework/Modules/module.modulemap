@@ -1,0 +1,11 @@
+framework module YMNetwork {
+  umbrella header "YMNetwork.h"
+
+  export *
+  module * { export * }
+}
+
+module YMNetwork.Swift {
+    header "YMNetwork-Swift.h"
+    requires objc
+}
