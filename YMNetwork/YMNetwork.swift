@@ -71,11 +71,21 @@ extension YMNetworkManagerDownloadDelegate {
     ) {}
 }
 
+public class DownloadManager {
+
+    static let shared = DownloadManager()
+
+    var activeDownloads: [URL?: YMDownloadRequest] = [:]
+}
+
 // MARK: - YMNetworkManager
 
 public class YMNetworkManager: NSObject, NetworkCommunication {
 
+    // MARK: - Data
     private var dataTask: URLSessionTask?
+
+    // MARK: - Download
     lazy var downloadsSession: URLSession = {
 
         let configuration = URLSessionConfiguration.default
@@ -87,6 +97,8 @@ public class YMNetworkManager: NSObject, NetworkCommunication {
         )
     }()
     private var downloadTask: URLSessionDownloadTask?
+
+    // MARK: - Upload
     lazy var uploadsSession: URLSession = {
         let conf = URLSessionConfiguration.default
         return URLSession(
@@ -96,10 +108,13 @@ public class YMNetworkManager: NSObject, NetworkCommunication {
         )
     }()
     private var uploadTask: URLSessionUploadTask?
+
+    // MARK: - Properties
+
     private var configuration: YMNetworkConfiguartion
     public weak var delegate: YMNetworkManagerDownloadDelegate?
 
-    public var activeDownloads: [URL?: YMDownloadRequest] = [:]
+    // MARK: - Lifecycle
 
     public init(configuration: YMNetworkConfiguartion) {
 
@@ -141,19 +156,19 @@ public class YMNetworkManager: NSObject, NetworkCommunication {
                 dataTask?.resume()
             case .download:
 
-                guard let url = urlRequest.url,
-                    var downloadRequest = request as? YMDownloadRequest else { return }
-                if let activeDownload = activeDownloads[url] {
-                    if !activeDownload.isDownloading {
-                        resumeDownloadTask(of: downloadRequest)
-                    }
+                guard let url = urlRequest.url else { return }
+
+                if let activeDownload = DownloadManager.shared.activeDownloads[url],
+                    !activeDownload.isDownloading {
+                    resumeDownloadTask(of: activeDownload)
                 } else {
                     downloadTask = downloadsSession.downloadTask(with: urlRequest)
                     downloadTask?.resume()
-                    downloadRequest.isDownloading = true
-                    downloadRequest.downloadTask = downloadTask
-                    delegate = downloadRequest.delegate
-                    activeDownloads[url] = downloadRequest
+                    let req = request as? YMDownloadRequest
+                    req?.isDownloading = true
+                    req?.downloadTask = downloadTask
+                    delegate = req?.delegate
+                    DownloadManager.shared.activeDownloads[url] = req
                 }
             case .upload:
                 guard let uploadRequest = request as? YMUploadRequest,
@@ -214,7 +229,6 @@ public class YMNetworkManager: NSObject, NetworkCommunication {
             return .failure(.failed)
         }
     }
-
 
     /// <#Description#>
     /// - Parameter request: <#request description#>
@@ -306,13 +320,13 @@ public extension YMNetworkManager {
 
         do {
             guard let url = try buildRequest(from: request)?.url,
-                var req = activeDownloads[url],
-                req.isDownloading ?? false else { return }
+                var req = DownloadManager.shared.activeDownloads[url],
+                req.isDownloading else { return }
 
-            req.downloadTask?.cancel(byProducingResumeData: { [weak self] (data) in
+            req.downloadTask?.cancel(byProducingResumeData: { (data) in
                 req.isDownloading = false
                 req.resumeData = data
-                self?.activeDownloads[url] = req
+                DownloadManager.shared.activeDownloads[url] = req
             })
         } catch {
             // TODO
@@ -323,26 +337,27 @@ public extension YMNetworkManager {
 
         do {
             guard let url = try buildRequest(from: request)?.url,
-                var req = activeDownloads[url] else { return }
+                var req = DownloadManager.shared.activeDownloads[url] else { return }
             req.downloadTask?.cancel()
             req.isDownloading = false
             req.resumeData = nil
             req.progress = .zero
-            activeDownloads[url] = req
+            DownloadManager.shared.activeDownloads[url] = req
         } catch {
             // TODO
         }
     }
 
     func resumeDownloadTask(
-        of request: YMDownloadRequest,
+        of request: YMDownloadRequest?,
         completion: ((_ status: Bool, _ error: String?) -> ())? = nil
     ) {
 
         do {
-            guard let url = try buildRequest(from: request)?.url,
-                var req = activeDownloads[url],
-            !(req.isDownloading ?? true) else { return }
+            guard let request = request,
+                let url = try buildRequest(from: request)?.url,
+                let req = DownloadManager.shared.activeDownloads[url],
+                !req.isDownloading else { return }
 
             if let resumeData = req.resumeData {
                 req.downloadTask = downloadsSession.downloadTask(withResumeData: resumeData)
@@ -355,12 +370,18 @@ public extension YMNetworkManager {
                 }
             }
             req.isDownloading = true
-            activeDownloads[url] = req
+            DownloadManager.shared.activeDownloads[url] = req
             req.downloadTask?.resume()
             completion?(true, nil)
         } catch {
             // TODO
         }
+    }
+
+    func getDownloadRequest(at path: String) -> YMDownloadRequest? {
+
+        guard let url = URL(string: path) else { return nil }
+        return DownloadManager.shared.activeDownloads[url]
     }
 }
 
@@ -375,15 +396,15 @@ extension YMNetworkManager: URLSessionDownloadDelegate {
     ) {
 
         guard let url = downloadTask.currentRequest?.url else { return }
-        var download = activeDownloads[url]
-        download?.isDownloading = false
-        download?.progress = 1.0
-        download?.resumeData = nil
-        activeDownloads[url] = download
+        let downloadRequest = DownloadManager.shared.activeDownloads[url]
+        downloadRequest?.isDownloading = false
+        downloadRequest?.progress = 1.0
+        downloadRequest?.resumeData = nil
+        DownloadManager.shared.activeDownloads[url] = downloadRequest
 
         delegate?.ymNetworkManager(
             self,
-            request: download,
+            request: downloadRequest,
             downloadTask: downloadTask,
             didFinishDownloadingTo: location
         )
@@ -398,15 +419,15 @@ extension YMNetworkManager: URLSessionDownloadDelegate {
     ) {
 
         guard let url = downloadTask.currentRequest?.url else { return }
-        var download = activeDownloads[url]
+        let downloadRequest = DownloadManager.shared.activeDownloads[url]
         let progress = Float(totalBytesWritten) / Float(totalBytesExpectedToWrite)
-        download?.progress = progress
-        activeDownloads[url] = download
+        downloadRequest?.progress = progress
+        DownloadManager.shared.activeDownloads[url] = downloadRequest
 
         print("Manager Log :::: Download Progress -> \(String(format: "%.2f", arguments: [progress]))")
         delegate?.ymNetworkManager(
             self,
-            request: download,
+            request: downloadRequest,
             downloadTask: downloadTask
         )
     }
