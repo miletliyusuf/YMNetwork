@@ -222,17 +222,9 @@ public class YMNetworkManager: NSObject, YMNetworkCommunication {
                     urlParameters: request.urlParameters,
                     request: &urlRequest
                 )
-//            case .upload:
-//                let boundary = UUID().uuidString
-//                urlRequest.setValue(
-//                    "multipart/form-data; boundary=\(boundary)",
-//                    forHTTPHeaderField: "Content-Type"
-//                )
-//                urlRequest.setValue("fileupload", forHTTPHeaderField: "reqtype")
-//                urlRequest.setValue(
-//                    "@\((request as? YMUploadRequest)?.fileURL?.absoluteString ?? "")",
-//                    forHTTPHeaderField: "fileToUpload"
-//                )
+            case .upload:
+                // TODO: Add upload with data support
+                break
             default:
                 break
             }
@@ -286,6 +278,8 @@ public class YMNetworkManager: NSObject, YMNetworkCommunication {
 
 public extension YMNetworkManager {
 
+    /// Start to download file for given request.
+    /// - Parameter request: YMDownloadRequest
     func download(with request: inout YMDownloadRequest?) throws {
 
         guard let ymRequest = request,
@@ -319,8 +313,8 @@ public extension YMNetworkManager {
                 req.resumeData = data
                 YMDownloadManager.shared.activeDownloads[url] = req
             })
-        } catch {
-            // TODO
+        } catch(let error) {
+            print(error.localizedDescription)
         }
     }
 
@@ -336,8 +330,8 @@ public extension YMNetworkManager {
             req.resumeData = nil
             req.progress = .zero
             YMDownloadManager.shared.activeDownloads[url] = req
-        } catch {
-            // TODO
+        } catch(let error) {
+            print(error.localizedDescription)
         }
     }
 
@@ -370,8 +364,8 @@ public extension YMNetworkManager {
             YMDownloadManager.shared.activeDownloads[url] = req
             req.downloadTask?.resume()
             completion?(true, nil)
-        } catch {
-            // TODO
+        } catch(let error) {
+            completion?(false, error.localizedDescription)
         }
     }
 }
