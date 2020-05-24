@@ -22,7 +22,7 @@ HTTP Networking library written in Swift.
 
 YMNetwork has been designed to create HTTP requests very easily.
 
-**IMPORTANT NOTE:** If you're implementing via **Cocoapods** you need to import framework as `import YMNetwork_Swift` and for **Carthage** `import YMNetwork` is enough. Please see [Installation](#installation) for detail informations.
+**IMPORTANT NOTE:** If you're implementing via **Cocoapods** you need to import framework as `import YMNetwork_Swift` and for **Carthage** `import YMNetwork` is enough. Please see [Installation](#installation) for detail informations. Also check [Example Project](https://github.com/miletliyusuf/YMFrameworksShowCase).
 
 ## Features
 
@@ -240,7 +240,7 @@ $ brew install carthage
 To integrate YMNetwork into your Xcode project using Carthage, specify it in your `Cartfile`:
 
 ```
-github "miletliyusuf/YMNetwork" >= 1.0.0
+github "miletliyusuf/YMNetwork"
 ```
 
 ## TODO
