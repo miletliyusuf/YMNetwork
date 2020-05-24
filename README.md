@@ -22,6 +22,8 @@ HTTP Networking library written in Swift.
 
 YMNetwork has been designed to create HTTP requests very easily.
 
+**IMPORTANT NOTE:** If you're implementing via **Cocoapods** you need to import framework as `import YMNetwork_Swift` and for **Carthage** `import YMNetwork` is enough. Please see [Installation](#installation) for detail informations.
+
 ## Features
 
 - [Object Mapping](#mapping)
@@ -206,7 +208,7 @@ manager.request(request) { (response, result: YMResult<T>, error) in
 
 ### CocoaPods
 
-Well.. `YMNetwork` is already taken for cocoapods. You should be installing pod as `pod 'YMNetwork-Swift'` but when you import framework in your code please just use `import YMNetwork`
+Well.. `YMNetwork` is already taken for cocoapods. You should be installing pod as `pod 'YMNetwork-Swift'` but when you import framework in your code please just use `import YMNetwork_Swift`
 
 Check out [Get Started](http://cocoapods.org/) tab on [cocoapods.org](http://cocoapods.org/).
 
