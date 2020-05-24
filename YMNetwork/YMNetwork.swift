@@ -92,12 +92,12 @@ public class YMNetworkManager: NSObject, YMNetworkCommunication {
 
     // MARK: - Properties
 
-    private var configuration: YMNetworkConfiguartion
+    private var configuration: YMNetworkConfiguration
     public weak var delegate: YMNetworkManagerDownloadDelegate?
 
     // MARK: - Lifecycle
 
-    public init(configuration: YMNetworkConfiguartion) {
+    public init(configuration: YMNetworkConfiguration) {
 
         self.configuration = configuration
     }

@@ -8,9 +8,9 @@
 
 import Foundation
 
-// MARK: - YMNetworkConfiguartion
+// MARK: - YMNetworkConfiguration
 
-public struct YMNetworkConfiguartion {
+public struct YMNetworkConfiguration {
 
     // TODO: - Add all possible configurations
 
