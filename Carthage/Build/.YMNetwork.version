@@ -8,11 +8,11 @@
   "tvOS" : [
 
   ],
-  "commitish" : "1.0.0",
+  "commitish" : "537e5b7a44b9d4cb5b00227b5afe0bb9a035bf6d",
   "iOS" : [
     {
       "name" : "YMNetwork",
-      "hash" : "f896f9e5e8506be546d78dd7a36436fd0b640607c59394d673b303ef9a610b3a",
+      "hash" : "3bbeb3fbc98476cb01e56dfed054dcae0fa6fa948e939599fee74ad41dbdf102",
       "swiftToolchainVersion" : "5.2.2 (swiftlang-1103.0.32.6 clang-1103.0.32.51)"
     }
   ]

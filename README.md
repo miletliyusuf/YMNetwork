@@ -212,7 +212,7 @@ Well.. `YMNetwork` is already taken for cocoapods. You should be installing pod 
 
 Check out [Get Started](http://cocoapods.org/) tab on [cocoapods.org](http://cocoapods.org/).
 
-To use Starscream in your project add the following 'Podfile' to your project
+To use YMNetwork in your project add the following 'Podfile' to your project
 
 	source 'https://github.com/CocoaPods/Specs.git'
 	platform :ios, '8.0'
