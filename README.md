@@ -5,7 +5,6 @@ HTTP Networking library written in Swift.
 ![YMNetwork](https://i.ibb.co/SxRgtw5/ymnetwork-Logo.png)
 
 [![Swift Version][swift-image]][swift-url]
-[![Build Status][travis-image]][travis-url]
 [![License][license-image]][license-url]
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![CocoaPods Compatible](https://img.shields.io/cocoapods/v/EZSwiftExtensions.svg)](https://img.shields.io/cocoapods/v/LFAlertController.svg)  
