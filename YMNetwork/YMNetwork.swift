@@ -187,20 +187,21 @@ public class YMNetworkManager: NSObject, YMNetworkCommunication {
                 let apiResponse = try JSONDecoder().decode(T.self, from: data)
                 return YMResult.success(apiResponse)
             } catch DecodingError.typeMismatch(_, let context) {
-                typeMismatchBlock?(
-                    [context.codingPath].map({ keyGroup in
-                        return keyGroup.map {
-                            if $0.intValue == nil {
-                                return $0.stringValue
-                            } else {
-                                return "[]"
-                            }
+                let paths = [context.codingPath].map({ keyGroup in
+                    return keyGroup.map {
+                        if $0.intValue == nil {
+                            return $0.stringValue
+                        } else {
+                            return "[]"
                         }
-                        .joined(separator: ".")
-                    })
-                )
-                return .failure(.decodingFailed)
-            } catch { return .failure(.decodingFailed) }
+                    }
+                    .joined(separator: ".")
+                })
+                typeMismatchBlock?(paths)
+                return .failure(.decodingFailed(reason: "Type Mismatch in response: \(String(describing: T.self)), parameters: \(paths)"))
+            } catch(let error) {
+                return .failure(.decodingFailed(reason: error.localizedDescription))
+            }
 
         case 401...500:
             return .failure(.authenticationError)
