@@ -20,6 +20,7 @@ public protocol YMNetworkCommunication: class {
 
     func request<T: YMResponse>(
         _ request: YMRequest,
+        typeMismatchBlock: (([String]) -> Void)?,
         completion: @escaping YMNetworkCompletion<T>
     )
     func cancelDataTask()
@@ -110,8 +111,8 @@ public class YMNetworkManager: NSObject, YMNetworkCommunication {
     ///   - completion: `YMNetworkCompletion<response: HTTPURLResponse?, _ result: YMResult<T>, error: Error?>`
     public func request<T: YMResponse>(
         _ request: YMRequest,
-        completion: @escaping YMNetworkCompletion<T>,
-        typeMismatchBlock: (([String]) -> Void)? = nil
+        typeMismatchBlock: (([String]) -> Void)? = nil,
+        completion: @escaping YMNetworkCompletion<T>
     ) {
 
         do {
