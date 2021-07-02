@@ -129,7 +129,10 @@ public class YMNetworkManager: NSObject, YMNetworkCommunication {
                             self?.dataTask = nil
                         }
 
-                        guard let urlResponse = response as? HTTPURLResponse else { return }
+                        guard let urlResponse = response as? HTTPURLResponse else {
+                            completion(nil, .failure(error?._code == -1001 ? .timedOut : .failed), error)
+                            return
+                        }
                         let result: YMResult<T> = self?.handleNetworkResponse(
                             Response(response: urlResponse, data: data),
                             typeMismatchBlock: typeMismatchBlock
@@ -150,7 +153,10 @@ public class YMNetworkManager: NSObject, YMNetworkCommunication {
                             self?.uploadTask = nil
                         }
 
-                        guard let urlResponse = response as? HTTPURLResponse else { return }
+                        guard let urlResponse = response as? HTTPURLResponse else {
+                            completion(nil, .failure(error?._code == -1001 ? .timedOut : .failed), error)
+                            return
+                        }
                         let result: YMResult<T> = self?.handleNetworkResponse(
                             Response(response: urlResponse, data: data)
                         ) ?? .failure(.failed)

@@ -33,6 +33,7 @@ public enum YMNetworkError {
     case noData
     case unableToDecode
     case unknown
+    case timedOut
     case decodingFailed(reason: String)
 
     public var humanReadable: String {
@@ -45,6 +46,7 @@ public enum YMNetworkError {
         case .noData: return "Response returned with no data to decode."
         case .unableToDecode: return "We could not decode the response."
         case .unknown: return "Unknown status code."
+        case .timedOut: return "Request timed out."
         case .decodingFailed(let error): return "Failed to decode data. Error:" + error
         }
     }
