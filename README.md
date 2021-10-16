@@ -242,6 +242,12 @@ To integrate YMNetwork into your Xcode project using Carthage, specify it in you
 github "miletliyusuf/YMNetwork"
 ```
 
+### Swift Package Manager
+
+```
+https://github.com/miletliyusuf/YMNetwork
+```
+
 ## TODO
 
 - [ ] Better Upload Management
