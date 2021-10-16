@@ -1,4 +1,0 @@
-module YMNetwork {
-    header "/Users/yusufmbp/Developer/Personal/YM Frameworks/YMNetwork/.build/x86_64-apple-macosx/debug/YMNetwork.build/YMNetwork-Swift.h"
-    requires objc
-}
