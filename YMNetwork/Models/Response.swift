@@ -21,19 +21,35 @@ public extension YMResponse {
 
 public protocol YMModel : Decodable, Encodable {}
 
-// MARK: - YMNetworkResponse
+// MARK: - YMNetworkError
 
-public enum YMNetworkResponse: String {
+public enum YMNetworkError {
 
     case success
-    case authenticationError = "You need to be authenticated first."
-    case badRequest = "Bad Request"
-    case outdated = "The url you requested is outdated."
-    case failed = "Network requst failed."
-    case noData = "Response returned with no data to decode."
-    case unableToDecode = "We could not decode the response."
-    case unknown = "Unknown status code."
-    case decodingFailed = "Failed to decode data."
+    case authenticationError
+    case badRequest
+    case outdated
+    case failed
+    case noData
+    case unableToDecode
+    case unknown
+    case timedOut
+    case decodingFailed(reason: String)
+
+    public var humanReadable: String {
+        switch self {
+        case .success: return "Success!"
+        case .authenticationError: return "You need to be authenticated first."
+        case .badRequest: return "Bad Request"
+        case .outdated: return "The url you requested is outdated."
+        case .failed: return "Network requst failed."
+        case .noData: return "Response returned with no data to decode."
+        case .unableToDecode: return "We could not decode the response."
+        case .unknown: return "Unknown status code."
+        case .timedOut: return "Request timed out."
+        case .decodingFailed(let error): return "Failed to decode data. Error:" + error
+        }
+    }
 }
 
 // MARK: - YMResult
@@ -41,7 +57,7 @@ public enum YMNetworkResponse: String {
 public enum YMResult<Value> {
 
     case success(Value)
-    case failure(YMNetworkResponse)
+    case failure(YMNetworkError)
 }
 
 // MARK: - Response
