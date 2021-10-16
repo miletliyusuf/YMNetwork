@@ -16,7 +16,7 @@ public typealias YMNetworkCompletion<T> = (
 
 // MARK: - YMNetworkCommunication
 
-public protocol YMNetworkCommunication: class {
+public protocol YMNetworkCommunication: AnyObject {
 
     func request<T: YMResponse>(
         _ request: YMRequest,

@@ -20,7 +20,9 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "YMNetwork",
-            dependencies: []),
+            dependencies: [],
+	    path: "./YMNetwork"
+	    ),
         .testTarget(
             name: "YMNetworkTests",
             dependencies: ["YMNetwork"]),
