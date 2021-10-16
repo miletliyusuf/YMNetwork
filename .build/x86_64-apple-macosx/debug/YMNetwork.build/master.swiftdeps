@@ -1,0 +1,6 @@
+version: "Apple Swift version 5.5 (swiftlang-1300.0.31.1 clang-1300.0.29.1)"
+options: "8f91f5c080ee05dfa082fbbdc06113a444cc9a4781f02ab54a8aa8fd08142ceb"
+build_start_time: [1634414243, 368290901]
+build_end_time: [1634414245, 147510051]
+inputs:
+  "/Users/yusufmbp/Developer/Personal/YM Frameworks/YMNetwork/Sources/YMNetwork/YMNetwork.swift": [1634414192, 752729892]
