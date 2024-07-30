@@ -15,3 +15,5 @@ Thumbs.db
 project.xcworkspace/
 project.xcworkspace/xcuserdata/
 xcuserdata/
+
+.build
