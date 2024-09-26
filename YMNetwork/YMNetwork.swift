@@ -24,6 +24,8 @@ public protocol YMNetworkCommunication: AnyObject {
         completion: @escaping YMNetworkCompletion<T>
     )
     func cancelDataTask()
+    
+    func request<T: YMResponse>(_ request: YMRequest) async throws -> T
 }
 
 // MARK: - YMNetworkManagerDownloadDelegate
@@ -170,6 +172,16 @@ public class YMNetworkManager: NSObject, YMNetworkCommunication {
             completion(nil, .failure(.failed), error)
         }
     }
+    
+    public func request<T: YMResponse>(_ request: YMRequest) async throws -> T {
+        guard let urlRequest = try buildRequest(from: request) else { throw YMNetworkError.invalidRequest }
+        
+        let (data, response) = try await URLSession.shared.data(for: urlRequest)
+        
+        guard let httpResponse = response as? HTTPURLResponse else { throw YMNetworkError.failed }
+        
+        return try handleAsyncResponse(data: data, response: httpResponse)
+    }
 
 
     /// Cancels current data task.
@@ -178,6 +190,25 @@ public class YMNetworkManager: NSObject, YMNetworkCommunication {
         dataTask?.cancel()
     }
 
+    private func handleAsyncResponse<T: YMResponse>(data: Data, response: HTTPURLResponse) throws -> T {
+        switch response.statusCode {
+        case 200...299:
+            do {
+                let apiResponse = try JSONDecoder().decode(T.self, from: data)
+                return apiResponse
+            } catch {
+                throw YMNetworkError.decodingFailed(reason: error.localizedDescription)
+            }
+        case 401...500:
+            throw YMNetworkError.authenticationError
+        case 501...599:
+            throw YMNetworkError.badRequest
+        case 600:
+            throw YMNetworkError.outdated
+        default:
+            throw YMNetworkError.failed
+        }
+    }
     /// Handles network response regarding it's status code.
     /// - Parameter response: YMResponse
     /// - Returns: YMResult

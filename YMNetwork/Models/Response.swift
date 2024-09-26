@@ -23,7 +23,7 @@ public protocol YMModel : Decodable, Encodable {}
 
 // MARK: - YMNetworkError
 
-public enum YMNetworkError {
+public enum YMNetworkError: Error {
 
     case success
     case authenticationError
@@ -34,6 +34,7 @@ public enum YMNetworkError {
     case unableToDecode
     case unknown
     case timedOut
+    case invalidRequest
     case decodingFailed(reason: String)
 
     public var humanReadable: String {
@@ -47,6 +48,7 @@ public enum YMNetworkError {
         case .unableToDecode: return "We could not decode the response."
         case .unknown: return "Unknown status code."
         case .timedOut: return "Request timed out."
+        case .invalidRequest: return "The framework was unable to build request. The request is invalid."
         case .decodingFailed(let error): return "Failed to decode data. Error:" + error
         }
     }
