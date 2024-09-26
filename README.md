@@ -13,7 +13,7 @@ HTTP Networking library written in Swift.
 
 ## Requirements
 
-- iOS 8.0+
+- iOS 15.0+
 - Xcode 11+
 - Swift 5.0+
 
@@ -214,7 +214,7 @@ Check out [Get Started](http://cocoapods.org/) tab on [cocoapods.org](http://coc
 To use YMNetwork in your project add the following 'Podfile' to your project
 
 	source 'https://github.com/CocoaPods/Specs.git'
-	platform :ios, '8.0'
+	platform :ios, '15.0'
 	use_frameworks!
 
 	pod 'YMNetwork-Swift'

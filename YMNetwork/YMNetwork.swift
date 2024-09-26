@@ -177,7 +177,6 @@ public class YMNetworkManager: NSObject, YMNetworkCommunication {
         guard let urlRequest = try buildRequest(from: request) else { throw YMNetworkError.invalidRequest }
         
         let (data, response) = try await URLSession.shared.data(for: urlRequest)
-        
         guard let httpResponse = response as? HTTPURLResponse else { throw YMNetworkError.failed }
         
         return try handleAsyncResponse(data: data, response: httpResponse)
